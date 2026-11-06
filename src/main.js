@@ -1,9 +1,10 @@
 import './style.css';
-import { BrowserProvider, Contract, ContractFactory, getAddress, isAddress } from 'ethers';
+import { BrowserProvider, Contract, ContractFactory, JsonRpcProvider, getAddress, isAddress } from 'ethers';
 import artifact from './contract.json';
 import deployment from './deployment.json';
 const $=id=>document.getElementById(id);
 const SEPOLIA='0xaa36a7';
+const readProvider=new JsonRpcProvider('https://ethereum-sepolia-rpc.publicnode.com');
 let provider, signer, contract, busy=false, record;
 const short=a=>a.slice(0,6)+'…'+a.slice(-4);
 function status(text,error=false){$('status').textContent=text;$('status').classList.toggle('error',error);}
@@ -25,15 +26,15 @@ async function load(){
  contract=null;controls();
  if(!signer)await wallet();await correctNetwork();
  const address=$('address').value.trim();if(!isAddress(address))throw Error('Enter a valid Sepolia contract address.');
- const normalized=getAddress(address);if(await provider.getCode(normalized)==='0x')throw Error('No contract exists at this address on Sepolia.');
- const candidate=new Contract(normalized,artifact.abi,signer);const note=await candidate.getNote();
- contract=candidate;render(note);$('address').value=normalized;
+ const normalized=getAddress(address);if(await readProvider.getCode(normalized)==='0x')throw Error('No contract exists at this address on Sepolia.');
+ const reader=new Contract(normalized,artifact.abi,readProvider);const note=await reader.getNote();
+ contract=new Contract(normalized,artifact.abi,signer);render(note);$('address').value=normalized;
  localStorage.setItem('chain-note:sepolia:address',normalized);$('contract-info').textContent=`Sepolia · ${normalized}`;
  status('Contract loaded. You can now publish a note.');
 }
 $('connect').onclick=()=>run(async()=>{await wallet();status('Wallet connected to Sepolia. Deploy or load a contract to continue.');if($('address').value.trim())await load();});
 $('load').onclick=()=>run(load);
-$('refresh').onclick=()=>run(async()=>{if(!contract)throw Error('Connect and load a contract first.');await correctNetwork();render(await contract.getNote());status('Latest note loaded from Sepolia.');});
+$('refresh').onclick=()=>run(async()=>{if(!contract)throw Error('Connect and load a contract first.');await correctNetwork();const reader=new Contract(await contract.getAddress(),artifact.abi,readProvider);render(await reader.getNote());status('Latest note loaded from Sepolia.');});
 $('deploy').onclick=()=>run(async()=>{
  if(!signer)await wallet();await correctNetwork();status('Approve the ChainNote deployment in your wallet.');
  const deployed=await new ContractFactory(artifact.abi,artifact.bytecode,signer).deploy();
@@ -45,7 +46,7 @@ $('deploy').onclick=()=>run(async()=>{
 });
 $('note-form').onsubmit=e=>{e.preventDefault();run(async()=>{
  await correctNetwork();if(!contract)throw Error('Load a contract first.');const text=$('draft').value.trim();const length=new TextEncoder().encode(text).length;if(!length||length>280)throw Error('Use 1–280 UTF-8 bytes.');
- status('Approve your message in your wallet.');const gas=await contract.setMessage.estimateGas(text);const tx=await contract.setMessage(text,{gasLimit:gas*120n/100n});transaction(tx.hash);status('Message submitted. Waiting for a confirmation…');await tx.wait();render(await contract.getNote());$('draft').value='';status('Your note is confirmed on Sepolia.');
+ status('Approve your message in your wallet.');const gas=await contract.setMessage.estimateGas(text);const tx=await contract.setMessage(text,{gasLimit:gas*120n/100n});transaction(tx.hash);status('Message submitted. Waiting for a confirmation…');await tx.wait();const reader=new Contract(await contract.getAddress(),artifact.abi,readProvider);render(await reader.getNote());$('draft').value='';status('Your note is confirmed on Sepolia.');
  });};
 $('draft').oninput=controls;
 $('download').onclick=()=>{if(!record)return;const blob=new Blob([JSON.stringify(record,null,2)+'\n'],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='sepolia-deployment.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
