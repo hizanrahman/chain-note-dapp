@@ -18,11 +18,11 @@ A simple decentralized message board built with Solidity, vanilla JavaScript, Vi
 <!-- deployment:start -->
 - Test network: **Ethereum Sepolia**
 - Chain ID: **11155111**
-- Contract address: **Pending wallet deployment — not yet deployed.**
-- Deployment transaction: **Pending.**
+- Contract address: [`0x02268EC106FC5bec024b30e0Ad2bD6f295aB771b`](https://sepolia.etherscan.io/address/0x02268EC106FC5bec024b30e0Ad2bD6f295aB771b)
+- Deployment transaction: [`0x4a619e47a58c136d21c399ed1b2762b094c5e79baaec60cbb7296a35012c22d8`](https://sepolia.etherscan.io/tx/0x4a619e47a58c136d21c399ed1b2762b094c5e79baaec60cbb7296a35012c22d8)
 <!-- deployment:end -->
 
-This section is deliberately not populated with an invented address. Run the deployment steps below and record the confirmed deployment before submitting the assignment.
+The deployment above was verified against its successful Sepolia receipt and this project’s compiled creation bytecode.
 
 ## Run the frontend
 
@@ -56,7 +56,11 @@ This command verifies the receipt, address, deployed bytecode and contract read 
 
 ![Chain Note frontend](docs/ui.png)
 
-The screenshot shows the actual frontend. A disconnected screenshot is not proof of an onchain deployment.
+The overview above shows the frontend layout. The connected screenshot below shows the deployed contract after a successful write on Sepolia.
+
+![Confirmed Sepolia note](docs/ui-connected.png)
+
+Verified demonstration transaction: [publish first note](https://sepolia.etherscan.io/tx/0x034eb6d80012379cdec3a2d7fe03138606f09dc1e261f41d1ea6b22e37e592dd). The contract returned revision 1 and the message “Hello Sepolia! My first DApp is live.” See `docs/onchain-verification.json` for the recorded result.
 
 ## Build and tests
 
