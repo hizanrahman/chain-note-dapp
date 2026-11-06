@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import solc from 'solc';
+const input = {language:'Solidity',sources:{'ChainNote.sol':{content:fs.readFileSync('contracts/ChainNote.sol','utf8')}},settings:{optimizer:{enabled:true,runs:200},evmVersion:'shanghai',outputSelection:{'*':{'*':['abi','evm.bytecode.object']}}}};
+const output=JSON.parse(solc.compile(JSON.stringify(input)));
+for(const e of output.errors??[]) console[e.severity==='error'?'error':'warn'](e.formattedMessage);
+if(output.errors?.some(e=>e.severity==='error')) process.exit(1);
+const c=output.contracts['ChainNote.sol'].ChainNote;
+fs.mkdirSync('src',{recursive:true});
+fs.writeFileSync('src/contract.json',JSON.stringify({abi:c.abi,bytecode:'0x'+c.evm.bytecode.object},null,2)+'\n');
+console.log('Compiled ChainNote with Solidity '+solc.version());
