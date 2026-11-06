@@ -45,7 +45,7 @@ $('deploy').onclick=()=>run(async()=>{
 });
 $('note-form').onsubmit=e=>{e.preventDefault();run(async()=>{
  await correctNetwork();if(!contract)throw Error('Load a contract first.');const text=$('draft').value.trim();const length=new TextEncoder().encode(text).length;if(!length||length>280)throw Error('Use 1–280 UTF-8 bytes.');
- status('Approve your message in your wallet.');const tx=await contract.setMessage(text);transaction(tx.hash);status('Message submitted. Waiting for a confirmation…');await tx.wait();render(await contract.getNote());$('draft').value='';status('Your note is confirmed on Sepolia.');
+ status('Approve your message in your wallet.');const gas=await contract.setMessage.estimateGas(text);const tx=await contract.setMessage(text,{gasLimit:gas*120n/100n});transaction(tx.hash);status('Message submitted. Waiting for a confirmation…');await tx.wait();render(await contract.getNote());$('draft').value='';status('Your note is confirmed on Sepolia.');
  });};
 $('draft').oninput=controls;
 $('download').onclick=()=>{if(!record)return;const blob=new Blob([JSON.stringify(record,null,2)+'\n'],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='sepolia-deployment.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
