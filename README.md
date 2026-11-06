@@ -90,3 +90,7 @@ This is intentionally a public shared board: any account can overwrite the curre
 - [ethers.js contract API](https://docs.ethers.org/v6/api/contract/)
 - [Ethereum networks](https://ethereum.org/en/developers/docs/networks/)
 - [Solidity documentation](https://docs.soliditylang.org/)
+
+### Test tooling note
+
+Ganache is used only as an in-process, disposable test chain with generated test accounts. Its bundled dependencies have published audit advisories; do not expose it as a public service or import real wallet keys into it. Ganache is not imported into the browser bundle. Node.js 24 may print a native-module warning before falling back to its JavaScript implementation; the contract test still runs.
